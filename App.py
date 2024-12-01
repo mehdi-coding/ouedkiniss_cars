@@ -37,7 +37,7 @@ def clean_data(data):
     # Filter the data where the 'date' is greater than 2020-01-01
     cleaned_data = cleaned_data[cleaned_data['date'] > '2020-01-01']
 
-    cleaned_data = cleaned_data[cleaned_data['price']>123]
+    cleaned_data = cleaned_data[cleaned_data['price']>49]
 
     cleaned_data = cleaned_data[cleaned_data['mileage']>=0]
 
