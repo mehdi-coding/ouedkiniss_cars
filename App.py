@@ -74,7 +74,7 @@ st.write("Cleaned Data:",data.shape[0])
 # Add a date range filter using Streamlit's date_input
 st.sidebar.subheader("Select Date Range")
 
-start = st.sidebar.date_input("From:", data['date'].min(),min_value=data['date'].min(),max_value=data['date'].max())
+start = st.sidebar.date_input("From:", data['date'].max() - pd.DateOffset(months=3),min_value=data['date'].min(),max_value=data['date'].max())
 end = st.sidebar.date_input("To:", data['date'].max(),min_value=start,max_value=data['date'].max())
 
 data= data[data['date'] >= f"{start}"]

@@ -1,0 +1,40 @@
+1. Price Analysis
+    -Average Price per Model/Brand: Compare the average price of different car models or brands.
+    -Price Distribution: Plot a histogram or boxplot of prices for each model to understand variability and identify outliers.
+    -Price vs. Year: Analyze how the price varies with the manufacturing year for specific models.
+2. Mileage Analysis
+    -Mileage vs. Price: Investigate if there's a trend between a car's mileage and its price. This can help you assess value for money.
+    -Average Mileage per Model/Brand: Identify models with lower average mileage within your budget.
+3. Age Analysis
+    -Car Age Distribution: Look at the age (current year - manufacturing year) of available cars.
+    -Age vs. Price: Determine how depreciation affects the price of specific brands/models.
+4. Fuel Type Preference
+    -Fuel Type Frequency: Check the popularity of each fuel type (e.g., petrol, diesel, hybrid) in the listings.
+    -Fuel Type vs. Price: Compare average prices across fuel types to see which offers better value.
+5. Gearbox Analysis
+    -Compare the prevalence of manual vs. automatic gearboxes.
+    -Analyze how gearbox type affects the price within the same model or brand.
+6. Brand/Model Popularity
+    -Count the number of listings per brand and model. A higher number of listings might indicate availability of parts or popularity.
+7. Location-Based Analysis
+    -Compare prices for the same model across different locations (wilaya). This can help you identify where you might find cheaper options.
+    -Analyze the distribution of listings by location to understand where certain models are more common.
+8. Color Preferences
+    -Frequency distribution of car colors to determine popular or less common choices.
+    -Color vs. Price: Analyze if certain colors are priced higher (e.g., metallic or custom colors).
+9. Feature Correlations
+    -Use correlation analysis to explore relationships between variables, such as:
+    -Engine size vs. price
+    -Mileage vs. age
+    -Year vs. gearbox type
+    -10. Market Trends
+    -Analyze listing dates to identify seasonal patterns or trends in availability and pricing.
+    -Visualization Tools:
+    -Use scatter plots for bivariate relationships (e.g., price vs. mileage).
+    -Use bar charts or pie charts for categorical variables (e.g., fuel type, gearbox type).
+    -Use heatmaps for correlation analysis.
+    -Decision-Making Framework:
+    -Budget vs. Value: Find models that offer low mileage and recent manufacturing years within your price range.
+    -Fuel Efficiency: Focus on fuel types that align with your usage and fuel costs in your region.
+    -Resale Value: Opt for models with a lower depreciation rate (analyze price trends by year).
+    -Availability: Consider models with more listings in your area for easier access to parts and service.
