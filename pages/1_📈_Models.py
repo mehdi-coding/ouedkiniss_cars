@@ -160,7 +160,6 @@ if model is not None and brand is not None:
     if not models_list.empty:
 
         st.write("N° of rows:", models_list.shape[0])
-        st.write(models_list)
 
         sns.boxplot(x=models_list['price'])
 
@@ -211,6 +210,9 @@ if model is not None and brand is not None:
         ax.set_xlabel("Mileage")
         ax.set_ylabel("Price")
         st.pyplot(fig)
+
+        st.write("Listing of the cars:")
+        st.write(models_list)
     else:
         st.write("No data available for the selected.")
 

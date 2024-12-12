@@ -54,7 +54,7 @@ def convert_df_to_excel(df):
 
 
 # Title
-st.title("Welcome Car Price Analysis Data Overview By Mehdi")
+st.title("Welcome Car Price Analysis Data Overview for cars between 50' & 700'")
 
 # Data Overview
 st.header("Number of Rows available")
