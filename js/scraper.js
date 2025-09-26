@@ -1,4 +1,5 @@
 const { chromium } = require('playwright');
+const dayjs = require("dayjs");
 
 const brands = require('./Brands.js');
 
@@ -10,7 +11,9 @@ const papers = ['Carte grise / safia', 'Carte jaune', 'Licence / Délai']
 
 const colors = ["Aubergine", "Autre", "Beige", "Blanc", "Bleu", "Bleu Ciel", "Bleu Gauloise", "Bleu Nuit", "Bleu Turquoise", "Grenat", "Gris", "Gris Alluminium", "Gris Argent", "Gris Champagne", "Gris Manitoba", "Gris Souris", "Jaune", "Maron Chocolat", "Mauve", "Miel", "Noir", "Orange", "Rose", "Rouge", "Rouge Bordeaux", "Vert", "Vert Bouteille", "Vert Militaire", "Vert Pistache", "Violet"]
 
-async function slowScroll(page, step = 100, delay = 200, maxNumber = 100) {
+let newRows = 0, updatedRows = 0, skippedRows = 0, allRows = 0
+
+async function slowScroll(page, step = 100, delay = 100, maxNumber = 100) {
     while (maxNumber > 0) {
         await page.evaluate((s) => window.scrollBy(0, s), step);
         await page.waitForTimeout(delay);
@@ -45,7 +48,7 @@ const Car = sequelize.define('Car', {
     finition: { type: DataTypes.STRING },
     location: { type: DataTypes.STRING },
     wilaya: { type: DataTypes.INTEGER },
-    date: { type: DataTypes.DATE },
+    date: { type: DataTypes.DATEONLY },
 }, {
     timestamps: true // auto-manages createdAt and updatedAt
 });
@@ -58,13 +61,13 @@ async function scrapeOuedkniss(page, pageNum = 1, minPice = 50, maxPrice = 120) 
     const url = `https://www.ouedkniss.com/automobiles_vehicules/${pageNum}?priceUnit=MILLION&priceRangeMin=${minPice}&priceRangeMax=${maxPrice}`;
 
 
-    console.log(`Navigating to ${url}...`);
+    // console.log(`Navigating to ${url}...`);
     await page.goto(url);
 
-    console.log("Scrolling and scraping to load all content...");
+    // console.log("Scrolling and scraping to load all content...");
 
     // Scroll to the bottom of the page
-    await slowScroll(page, 1200, 200, 10)
+    await slowScroll(page, 1200, 100, 10)
 
     // Wait for a brief moment for new content to load
     await page.waitForTimeout(2000); // Wait for 2 seconds
@@ -74,11 +77,13 @@ async function scrapeOuedkniss(page, pageNum = 1, minPice = 50, maxPrice = 120) 
     // const allListingItems = await autoScrollAndCollect(page);
 
     for (let i = 0; i < allListingItems.length; i++) {
+        allRows++
+
         const item = allListingItems[i];
 
         // Scroll into view before scraping
         await item.scrollIntoViewIfNeeded();
-        await page.waitForTimeout(200); // small delay to let content load
+        await page.waitForTimeout(50); // small delay to let content load
 
         let href, titleText, brand, year, model, finition, price, mileage, fuel, gearBox, paper, engine, color, location, wilaya, postDate
 
@@ -200,54 +205,44 @@ async function scrapeOuedkniss(page, pageNum = 1, minPice = 50, maxPrice = 120) 
             if (await dateLocator.count() > 0) {
                 let dateText = await dateLocator.innerText();
                 dateText = dateText.trim().split(" ")
-                if (dateText[dateText.length - 1].trim().toLowerCase() === "ans") {
-                    postDate = new Date();
-                    postDate.setFullYear(postDate.getFullYear() - Number(dateText[dateText.length - 2].trim()));
-                } else if (dateText[dateText.length - 1].trim().toLowerCase() === "mois") {
-                    postDate = new Date();
-                    postDate.setMonth(postDate.getMonth() - Number(dateText[dateText.length - 2].trim()));
-                } else if (dateText[dateText.length - 1].trim().toLowerCase() === "jours") {
-                    postDate = new Date();
-                    postDate.setDate(postDate.getDate() - Number(dateText[dateText.length - 2].trim()));
-                } else if (dateText[dateText.length - 1].trim().toLowerCase() === "jour") {
-                    postDate = new Date();
-                    postDate.setDate(postDate.getDate() - Number(dateText[dateText.length - 2].trim()));
-                } else if (dateText[dateText.length - 1].trim().toLowerCase() === "heures") {
-                    postDate = new Date();
-                    postDate.setHours(postDate.getHours() - Number(dateText[dateText.length - 2].trim()));
-                } else if (dateText[dateText.length - 1].trim().toLowerCase() === "heure") {
-                    postDate = new Date();
-                    postDate.setHours(postDate.getHours() - Number(dateText[dateText.length - 2].trim()));
-                } else if (dateText[dateText.length - 1].trim().toLowerCase() === "minutes") {
-                    postDate = new Date();
-                    postDate.setMinutes(postDate.getMinutes() - Number(dateText[dateText.length - 2].trim()));
-                } else if (dateText[dateText.length - 1].trim().toLowerCase() === "minute") {
-                    postDate = new Date();
-                    postDate.setMinutes(postDate.getMinutes() - Number(dateText[dateText.length - 2].trim()));
-                }
+                const unitHandlers = {
+                    ans: (d, n) => d.setFullYear(d.getFullYear() - n),
+                    mois: (d, n) => d.setMonth(d.getMonth() - n),
+                    jours: (d, n) => d.setDate(d.getDate() - n),
+                    jour: (d, n) => d.setDate(d.getDate() - n),
+                    heures: (d, n) => d.setHours(d.getHours() - n),
+                    heure: (d, n) => d.setHours(d.getHours() - n),
+                    minutes: (d, n) => d.setMinutes(d.getMinutes() - n),
+                    minute: (d, n) => d.setMinutes(d.getMinutes() - n),
+                };
 
-                if (postDate) postDate = postDate.toISOString().split("T")[0]
+                const [num, unit] = [Number(dateText.at(-2)), dateText.at(-1).toLowerCase()];
+                if (unitHandlers[unit]) {
+                    postDate = new Date();
+                    unitHandlers[unit](postDate, num);
+                    postDate = dayjs(postDate).format("YYYY-MM-DD");
+                }
             }
 
 
 
             // Logging results
-            console.log(href);
-            console.log(`Listing ${i + 1}: ${titleText}`);
-            console.log("Brand:", brand);
-            console.log("Model:", model);
-            console.log("Finition:", finition);
-            console.log("Color:", color);
-            console.log("Engine:", engine);
-            console.log("Year:", year);
-            console.log("Price:", price);
-            console.log("Mileage:", mileage);
-            console.log("Fuel:", fuel);
-            console.log("GearBox:", gearBox);
-            console.log("Paper:", paper);
-            console.log("Location:", location);
-            console.log("Wilaya:", wilaya);
-            console.log("Date:", postDate);
+            // console.log(href);
+            // console.log(`Listing ${i + 1}: ${titleText}`);
+            // console.log("Brand:", brand);
+            // console.log("Model:", model);
+            // console.log("Finition:", finition);
+            // console.log("Color:", color);
+            // console.log("Engine:", engine);
+            // console.log("Year:", year);
+            // console.log("Price:", price);
+            // console.log("Mileage:", mileage);
+            // console.log("Fuel:", fuel);
+            // console.log("GearBox:", gearBox);
+            // console.log("Paper:", paper);
+            // console.log("Location:", location);
+            // console.log("Wilaya:", wilaya);
+            // console.log("Date:", postDate);
 
             const existing = await Car.findOne({ where: { link: href } });
 
@@ -273,9 +268,11 @@ async function scrapeOuedkniss(page, pageNum = 1, minPice = 50, maxPrice = 120) 
                 });
 
                 if (updated.changed().length > 0) {
-                    console.log("♻️ Updated fields:", updated.changed());
+                    updatedRows++
+                    // console.log("♻️ Updated fields:", updated.changed());
                 } else {
-                    console.log("✅ No changes, skipped update.");
+                    // console.log("✅ No changes, skipped update.");
+                    skippedRows++
                 }
             } else {
                 await Car.create({
@@ -296,31 +293,48 @@ async function scrapeOuedkniss(page, pageNum = 1, minPice = 50, maxPrice = 120) 
                     wilaya,
                     date: postDate
                 });
-                console.log("🚀 Inserted new car:", href);
+                // console.log("🚀 Inserted new car:", href);
+                newRows++
             }
 
-            console.log('------------')
+            // console.log(`------------`)
 
         } catch (e) {
             console.log(`Error scraping listing ${i + 1}: ${e.message}`);
         }
     }
-
-
 }
 
 async function main(numberPages = 1, minPice = 50, maxPrice = 3000) {
-    await sequelize.sync(); // ensure table is ready
+    // await sequelize.sync(); // ensure table is ready
+    await sequelize.authenticate();
+    await Car.sync(); // only ensures the Car table exists
     // Run the main function
-    const browser = await chromium.launch({ headless: false });
+    const browser = await chromium.launch({ headless: true });
     const page = await browser.newPage();
+    const allStart = Date.now();
     for (let index = numberPages; index > 0; index--) {
+        console.log(`Page ${index} processing started`);
+        const start = Date.now(); // start time in ms
         await scrapeOuedkniss(page, index, minPice, maxPrice);
+        const end = Date.now();   // end time in ms
+        const duration = ((end - start) / 1000).toFixed(2); // seconds
+
+        console.log(`Page ${index} completed in ${duration}s`);
+        console.log('--------------------------------');
+
     }
 
     // Close the browser
-    // await browser.close();
-    console.log("Scraping finished.");
+    await browser.close();
+
+    const allEnd = Date.now();   // end time in ms
+    const allDuration = ((allEnd - allStart) / 1000).toFixed(2); // seconds
+
+    console.log(`Scraping finished in ${allDuration}s`);
+    console.log(`${newRows} rows created`);
+    console.log(`${updatedRows} rows updated`);
+    console.log(`${skippedRows} rows skipped`);
 }
 
 main(2)

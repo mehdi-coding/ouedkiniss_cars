@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/mehdi-coding/ouedkiniss_cars#readme",
   "dependencies": {
+    "dayjs": "^1.11.18",
     "playwright": "^1.55.1",
     "sequelize": "^6.37.7",
     "sqlite3": "^5.1.7"
