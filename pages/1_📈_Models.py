@@ -6,63 +6,7 @@ import sqlite3
 import io
 import mplcursors
 import plotly.express as px
-
-# Connect to SQLite database and load data
-@st.cache_data
-def load_data_from_db():
-    # Adjust the path to your SQLite file
-    conn = sqlite3.connect("cars_db.sqlite")  
-    query = "SELECT link, title, price, engine, fuel, mileage, color, gearbox, paper, brand, year, model, finition, location, wilaya, date FROM cars"
-    data = pd.read_sql(query, conn)
-    conn.close()
-    return data
-
-# Clean the data
-def clean_data(data):
-    # Drop rows where 'brand' or 'model' is empty (NaN or empty string)
-    cleaned_data = data.dropna(subset=['brand', 'model'])  # Drop rows where brand or model is NaN
-    cleaned_data = cleaned_data[cleaned_data['brand'].str.strip() != '']  # Remove rows with empty string in 'brand'
-    cleaned_data = cleaned_data[cleaned_data['model'].str.strip() != '']  # Remove rows with empty string in 'model'
-
-    # Remove rows where the number of occurrences of a brand is less than 20
-    cleaned_data = cleaned_data.groupby('model').filter(lambda x: len(x) >= 20)
-    cleaned_data = cleaned_data.groupby('brand').filter(lambda x: len(x) >= 20)
-
-    # Convert 'date' column to datetime
-    cleaned_data['date'] = pd.to_datetime(cleaned_data['date'])
-
-    # Filter the data where the 'date' is greater than 2020-01-01
-    # cleaned_data = cleaned_data[cleaned_data['date'] > '2020-01-01']
-
-    cleaned_data = cleaned_data[cleaned_data['price']>49]
-
-    cleaned_data = cleaned_data[cleaned_data['mileage']>=0]
-
-    # Ensure only integer values in the 'year' column
-    cleaned_data['year'] = pd.to_numeric(cleaned_data['year'], errors='coerce')
-    cleaned_data = cleaned_data.dropna(subset=['year'])  # Drop rows where 'year' is NaN
-    cleaned_data['year'] = cleaned_data['year'].astype(int)  # Convert 'year' to integers
-
-    # Ensure only integer values in the 'mileage' column
-    cleaned_data['mileage'] = pd.to_numeric(cleaned_data['mileage'], errors='coerce')
-    cleaned_data = cleaned_data.dropna(subset=['mileage'])  # Drop rows where 'mileage' is NaN
-    cleaned_data['mileage'] = cleaned_data['mileage'].astype(int)  # Convert 'mileage' to integers
-
-    cleaned_data['mileage'] = cleaned_data['mileage'].apply(lambda x: x * 1000 if x < 600 else x)
-
-    cleaned_data['mileage'] = cleaned_data['mileage'].apply(lambda x: x / 10 if x > 600000 else x)
-
-    return cleaned_data
-
-def convert_df_to_excel(df):
-    """
-    Convert a DataFrame to an Excel file stored in memory for download.
-    """
-    output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False, sheet_name="Car Data")
-    return output.getvalue()
-
+from utils import load_data_from_db, clean_data, convert_df_to_excel
 
 
 st.title("Models Analysis")
