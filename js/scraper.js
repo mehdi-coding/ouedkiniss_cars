@@ -337,4 +337,4 @@ async function main(numberPages = 1, minPice = 50, maxPrice = 3000) {
     console.log(`${skippedRows} rows skipped`);
 }
 
-main(2)
+main(50)
