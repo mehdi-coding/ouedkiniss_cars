@@ -6,7 +6,7 @@ import plotly.express as px
 from utils import load_data_from_db, clean_data, convert_df_to_excel
 
 # Title
-st.title("Welcome Car Price Analysis Data Overview for cars between 50' & 700'")
+st.title("Welcome Car Price Analysis Data Overview for cars")
 
 # Data Overview
 st.header("Number of Rows available")
@@ -33,6 +33,26 @@ data= data[data['date'] >= f"{start}"]
 data= data[data['date'] <= f"{end}"]
 
 st.write("Filtred Data per Posting Year:",data.shape[0])
+
+# ---------------------------------------------------------------------
+# Price range filter
+st.sidebar.subheader("Select Price Range")
+
+min_price = int(data['price'].min())
+max_price = int(data['price'].max())
+
+price_range = st.sidebar.slider(
+    "Price Range",
+    min_value=min_price,
+    max_value=max_price,
+    value=(min_price, max_price),
+    step=100
+)
+
+# Apply the filter
+data = data[(data['price'] >= price_range[0]) & (data['price'] <= price_range[1])]
+
+st.write("Filtered Data after Date & Price Range:", data.shape[0])
 
 # ---------------------------------------------------------------------
 

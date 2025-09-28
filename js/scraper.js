@@ -75,7 +75,7 @@ async function scrapeOuedkniss(page, pageNum = 1, minPice = 50, maxPrice = 120) 
     // Get all the listing divs and scrape the new ones
     const allListingItems = await page.locator('.search-view-item').all();
     // const allListingItems = await autoScrollAndCollect(page);
-
+    let nnr = 0, uur = 0, ssr = 0
     for (let i = 0; i < allListingItems.length; i++) {
         allRows++
 
@@ -269,10 +269,12 @@ async function scrapeOuedkniss(page, pageNum = 1, minPice = 50, maxPrice = 120) 
 
                 if (updated.changed().length > 0) {
                     updatedRows++
+                    uur++
                     // console.log("♻️ Updated fields:", updated.changed());
                 } else {
                     // console.log("✅ No changes, skipped update.");
                     skippedRows++
+                    ssr++
                 }
             } else {
                 await Car.create({
@@ -295,6 +297,7 @@ async function scrapeOuedkniss(page, pageNum = 1, minPice = 50, maxPrice = 120) 
                 });
                 // console.log("🚀 Inserted new car:", href);
                 newRows++
+                nnr++
             }
 
             // console.log(`------------`)
@@ -303,6 +306,9 @@ async function scrapeOuedkniss(page, pageNum = 1, minPice = 50, maxPrice = 120) 
             console.log(`Error scraping listing ${i + 1}: ${e.message}`);
         }
     }
+    console.log(`${nnr} rows created`);
+    console.log(`${uur} rows updated`);
+    console.log(`${ssr} rows skipped`);
 }
 
 async function main(numberPages = 1, minPice = 50, maxPrice = 3000) {
@@ -332,9 +338,9 @@ async function main(numberPages = 1, minPice = 50, maxPrice = 3000) {
     const allDuration = ((allEnd - allStart) / 1000).toFixed(2); // seconds
 
     console.log(`Scraping finished in ${allDuration}s`);
-    console.log(`${newRows} rows created`);
-    console.log(`${updatedRows} rows updated`);
-    console.log(`${skippedRows} rows skipped`);
+    console.log(`Total => ${newRows} rows created`);
+    console.log(`Total => ${updatedRows} rows updated`);
+    console.log(`Total => ${skippedRows} rows skipped`);
 }
 
-main(50)
+main(610)
