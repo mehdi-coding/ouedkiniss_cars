@@ -2,6 +2,7 @@ import sqlite3
 import pandas as pd
 import io
 import streamlit as st
+import datetime
 
 # Connect to SQLite database and load data
 @st.cache_data
@@ -34,6 +35,32 @@ def clean_data(data):
 
     cleaned_data = cleaned_data[cleaned_data['mileage']>=0]
 
+    # Define the list of unwanted prices
+    bad_prices = [
+        123, 
+        111, 1111, 11111,
+        222, 2222, 22222,
+        333, 3333, 33333,
+        444, 4444, 44444,
+        55, 555, 5555, 55555,
+        66, 666, 6666, 66666,
+        77, 777, 7777, 77777,
+        88, 888, 8888, 88888,
+        99, 999, 9999, 99999
+    ]
+
+    # Remove rows where price is in that list
+    cleaned_data = cleaned_data[~cleaned_data['price'].isin(bad_prices)]
+
+    # Current year
+    current_year = datetime.datetime.now().year
+
+    # If mileage < 1000 and year != current year → multiply mileage * 1000
+    cleaned_data.loc[(cleaned_data["mileage"] < 1000) & (cleaned_data["year"] != current_year), "mileage"] *= 1000
+
+    # Convert all model names to uppercase
+    cleaned_data["model"] = cleaned_data["model"].str.upper()
+    
     return cleaned_data
 
 def convert_df_to_excel(df):

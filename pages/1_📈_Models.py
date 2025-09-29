@@ -18,19 +18,21 @@ data['date_int'] = (data['date'] - pd.Timestamp('1970-01-01')) // pd.Timedelta('
 # Add a date range filter using Streamlit's date_input
 st.sidebar.subheader("Select Date Range")
 
-start = st.sidebar.date_input("From:", data['date'].max() - pd.DateOffset(months=3),min_value=data['date'].min(),max_value=data['date'].max())
-end = st.sidebar.date_input("To:", data['date'].max(),min_value=start,max_value=data['date'].max())
+start = st.sidebar.date_input("From:", data['date'].max() - pd.DateOffset(months=1),min_value=data['date'].min(),max_value=data['date'].max())
+end = st.sidebar.date_input("To:", data['date'].max(),start,max_value=data['date'].max())
 
 data= data[data['date'] >= f"{start}"]
 data= data[data['date'] <= f"{end}"]
+
+st.write("Filtred Data per Posting Year:",data.shape[0])
 # ---------------------------------------------------------------------
 # Price range filter
-st.sidebar.subheader("Select Price Range")
+st.subheader("Select Price Range")
 
 min_price = int(data['price'].min())
 max_price = int(data['price'].max())
 
-price_range = st.sidebar.slider(
+price_range = st.slider(
     "Price Range",
     min_value=min_price,
     max_value=max_price,
