@@ -53,6 +53,23 @@ const Car = sequelize.define('Car', {
     timestamps: true // auto-manages createdAt and updatedAt
 });
 
+async function safeGoto(page, url, retries = 3, delay = 30000) {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+            await page.goto(url, { waitUntil: "load", timeout: 30000 });
+            return; // success
+        } catch (err) {
+            console.log(`❌ Failed to load ${url} (attempt ${attempt}/${retries}): ${err.message}`);
+            if (attempt < retries) {
+                console.log(`🔄 Retrying in ${delay / 1000}s...`);
+                await page.waitForTimeout(delay);
+                continue;
+            }
+            throw err; // give up after max retries
+        }
+    }
+}
+
 async function scrapeOuedkniss(page, pageNum = 1, minPice = 50, maxPrice = 120) {
     /**
      * Scrapes car titles from Ouedkniss.com using Playwright.
@@ -61,8 +78,8 @@ async function scrapeOuedkniss(page, pageNum = 1, minPice = 50, maxPrice = 120) 
     const url = `https://www.ouedkniss.com/automobiles_vehicules/${pageNum}?priceUnit=MILLION&priceRangeMin=${minPice}&priceRangeMax=${maxPrice}`;
 
 
-    // console.log(`Navigating to ${url}...`);
-    await page.goto(url);
+    // use safe goto instead of page.goto
+    await safeGoto(page, url);
 
     // console.log("Scrolling and scraping to load all content...");
 
@@ -343,4 +360,4 @@ async function main(numberPages = 1, minPice = 50, maxPrice = 3000) {
     console.log(`Total => ${skippedRows} rows skipped`);
 }
 
-main(610)
+main(100)
